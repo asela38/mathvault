@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+db.sqlite3
+.pytest_cache/
+# Pwned Passwords artefacts are large and environment-specific.
+data/pwned/*.bloom
+data/pwned/*.sha256
+data/pwned/hashes/
+!data/pwned/.gitkeep

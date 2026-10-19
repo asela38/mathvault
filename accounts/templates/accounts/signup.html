@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Sign up · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>Create your account</h1>
+  <p class="muted">Pick a long passphrase you don't use anywhere else. A sentence works well: <em>"integrate over the whole real line twice"</em>. Password managers are welcome.</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}<div class="helptext">{{ field.help_text|safe }}</div>{% endif %}
+      {{ field.errors }}
+    {% endfor %}
+    <button class="primary" type="submit">Sign up</button>
+  </form>
+</div>
+{% endblock %}

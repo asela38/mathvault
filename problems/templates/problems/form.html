@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h1>Post a problem</h1>
+  <form method="post">{% csrf_token %}
+    {% for field in form %}<label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<div class="helptext">{{ field.help_text }}</div>{% endif %}{{ field.errors }}{% endfor %}
+    <button class="primary" type="submit">Post</button>
+  </form>
+</div>
+{% endblock %}

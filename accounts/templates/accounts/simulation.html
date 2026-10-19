@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}How the Bloom filter works · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<style>
+  .sim-grid { display:grid; grid-template-columns: repeat(64, 1fr); gap:1px; background:var(--line); border:1px solid var(--line); margin:12px 0; }
+  .sim-grid .bit { aspect-ratio:1; background:#fff; position:relative; }
+  .sim-grid .bit.set { background:#2b5ea7; }
+  .sim-grid .bit.flash { background:#e4a11b !important; }
+  .sim-grid .bit.hit { background:#1d7a4d !important; }
+  .sim-grid .bit.miss { background:#b3261e !important; }
+  .mono { font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-all; }
+  .formula { background:#f3f1ea; border-radius:6px; padding:10px 14px; margin:10px 0; }
+  .steps li { margin-bottom:6px; }
+  .verdict { font-size:1.1rem; padding:12px 16px; border-radius:6px; margin-top:12px; }
+  .verdict.reject { background:#fbe9e7; color:var(--bad); }
+  .verdict.pass { background:#e8f3ec; color:var(--good); }
+  .legend span { display:inline-block; width:12px; height:12px; vertical-align:middle; margin-right:4px; border:1px solid var(--line); }
+  .row { display:flex; gap:16px; flex-wrap:wrap; } .row > * { flex:1 1 260px; }
+  table.trace td:first-child { white-space:nowrap; }
+  tr.current { background:#fff7e0; }
+  .pill { display:inline-block; padding:1px 7px; border-radius:9px; font-size:.8rem; background:#eef2f9; color:var(--accent); }
+  button.secondary { margin-top:10px; background:#fff; color:var(--accent); border:1px solid var(--accent); border-radius:6px; padding:8px 14px; font:inherit; cursor:pointer; }
+</style>
+
+<div class="card">
+  <h1>How the compromised-password check works</h1>
+  <p>In production the filter is built once a month from the full Have I Been Pwned corpus (about 1.9 billion SHA-1 hashes, a 4.3 GB file).
+  This page runs the <em>same code</em> (<code>accounts/pwned/bloom.py</code> and <code>BloomPwnedValidator</code>) on a list small enough to watch.
+  Two stages: <strong>1. build</strong> the bit array from a password list, <strong>2. check</strong> a candidate password against it.</p>
+</div>
+
+<div class="card" id="build">
+  <h2>Stage 1 — build the filter from a password list</h2>
+  <div class="row">
+    <div>
+      <label for="passwords">Breached passwords (one per line)</label>
+      <textarea id="passwords" rows="10">{{ default_passwords }}</textarea>
+    </div>
+    <div>
+      <label for="fp">Target false-positive rate <em>p</em></label>
+      <select id="fp">
+        <option value="0.1">1 in 10 (0.1)</option>
+        <option value="0.01" selected>1 in 100 (0.01)</option>
+        <option value="0.001">1 in 1,000 (0.001)</option>
+        <option value="0.0001">1 in 10,000 (0.0001) — production</option>
+      </select>
+      <label><input type="checkbox" id="animate" checked> Animate insertions</label>
+      <button class="primary" id="build-btn" type="button">Build filter</button>
+      <p class="muted" id="build-error"></p>
+    </div>
+  </div>
+
+  <div id="sizing" hidden>
+    <h2>Sizing</h2>
+    <div class="formula mono" id="sizing-text"></div>
+    <p class="muted">The same formula sized the production file: n = 1.9 × 10⁹, p = 10⁻⁴ gives m ≈ 3.6 × 10¹⁰ bits (4.3 GB) and k = 13.</p>
+  </div>
+
+  <div id="bitgrid-wrap" hidden>
+    <h2>Bit array (<span id="m-label"></span> bits, all zero to start)</h2>
+    <p class="legend muted"><span style="background:#fff"></span> 0 &nbsp; <span style="background:#2b5ea7"></span> 1 &nbsp; <span style="background:#e4a11b"></span> being set &nbsp; <span style="background:#1d7a4d"></span> probe hit (bit is 1) &nbsp; <span style="background:#b3261e"></span> probe miss (bit is 0)</p>
+    <div class="sim-grid" id="grid"></div>
+    <p class="muted" id="fill"></p>
+  </div>
+
+  <div id="trace-wrap" hidden>
+    <h2>Each password → SHA-1 → k positions</h2>
+    <div class="formula mono">h1 = first 8 bytes of SHA-1 &nbsp; h2 = next 8 bytes | 1 &nbsp; pos<sub>i</sub> = (h1 + i·h2) mod 2⁶⁴ mod m, &nbsp; i = 0 … k−1</div>
+    <table class="trace" id="trace"></table>
+    <p class="muted">The file on disk is a 64-byte header followed by this bit array. Header: <span class="mono" id="header"></span></p>
+  </div>
+</div>
+
+<div class="card" id="check">
+  <h2>Stage 2 — use the filter as a validator</h2>
+  <p>Type a candidate password. The validator hashes it, computes the same k positions and reads those bits.
+  The first 0 bit proves the password was never inserted, so the check stops there. If all k bits are 1 the password is <em>probably</em> in the corpus and is rejected.</p>
+  <div class="row">
+    <div>
+      <label for="probe">Candidate password</label>
+      <input type="text" id="probe" value="password" maxlength="256" autocomplete="off">
+    </div>
+    <div style="align-self:end">
+      <button class="primary" id="check-btn" type="button">Check password</button>
+      <button class="secondary" id="hunt-btn" type="button">Find a false positive</button>
+    </div>
+  </div>
+  <p class="muted" id="check-error"></p>
+  <div id="check-result" hidden>
+    <ol class="steps" id="check-steps"></ol>
+    <div class="verdict" id="verdict"></div>
+    <p class="muted" id="validator-note"></p>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Why this is safe to use as a blocklist</h2>
+  <ul>
+    <li><strong>No false negatives.</strong> A breached password always sets its k bits, so it can never slip through. That is what NIST's blocklist rule needs.</li>
+    <li><strong>Rare, cheap false positives.</strong> Roughly p of never-seen passwords collide with set bits and are rejected; the user just picks another one. Production uses p = 1 in 10,000.</li>
+    <li><strong>No password or hash leaves the server.</strong> Only ~13 reads into a memory-mapped file per check, in microseconds.</li>
+    <li><strong>Size is fixed at build time.</strong> ~4.3 GB holds the whole 75 GB corpus; the file is rebuilt monthly and swapped atomically.</li>
+  </ul>
+</div>
+<script src="{% static 'bloom-sim.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h1>Open problems and exercises</h1>
+  <p class="muted">A shared vault of problems, proofs and counterexamples. Filter:
+    <a href="{% url 'problems:list' %}">all</a>{% for value, label in topics %} · <a href="?topic={{ value }}">{{ label }}</a>{% endfor %}</p>
+  {% if problems %}
+  <table>
+    <tr><th>Problem</th><th>Topic</th><th>Level</th><th>Posted by</th></tr>
+    {% for p in problems %}
+    <tr><td><a href="{{ p.get_absolute_url }}">{{ p.title }}</a></td><td>{{ p.get_topic_display }}</td><td>{{ p.get_difficulty_display }}</td><td>{{ p.author.username }}</td></tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p>No problems yet. Run <code>manage.py seed_demo</code> or <a href="{% url 'problems:create' %}">post one</a>.</p>
+  {% endif %}
+</div>
+{% endblock %}

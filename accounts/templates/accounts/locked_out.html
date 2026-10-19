@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+  <h1>Too many failed sign-in attempts</h1>
+  <p>This account (or your network address) has been locked after too many consecutive failed attempts.
+  {% if cooloff_timedelta %}Try again in {{ cooloff_timedelta }}{% else %}Try again later{% endif %}, or ask an administrator to reset the lock.</p>
+</div>
+{% endblock %}

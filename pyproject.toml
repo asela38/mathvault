@@ -1,0 +1,33 @@
+[project]
+name = "mathvault"
+version = "0.1.0"
+description = "Reference Django project: NIST SP 800-63B Rev. 4 password screening (common, compromised and context-specific blocklists) for a mathematics problem-sharing portal."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "django>=6.1,<6.2",
+    "django-axes>=8.3",
+    "argon2-cffi>=25.1",
+]
+
+[project.optional-dependencies]
+# numpy is only needed by the offline Bloom-filter build job, never by the web app.
+build = ["numpy>=2.0"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-django>=4.14",
+    "numpy>=2.0",
+]
+
+[tool.pytest.ini_options]
+markers = ["slow: statistical tests that take a few seconds"]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["test_*.py"]
+testpaths = ["accounts", "problems"]
+addopts = "-q"
+filterwarnings = ["error::DeprecationWarning:django", "ignore::DeprecationWarning"]
+
+[tool.uv]
+package = false

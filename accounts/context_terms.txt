@@ -1,0 +1,157 @@
+# Context-specific blocklist for MathVault (NIST SP 800-63B Rev. 4 §3.1.1.2).
+# One term per line; '#' starts a comment. Terms are canonicalised
+# (casefold, separators removed, edge digits/punctuation stripped, leetspeak
+# undone) and compared for *equality* with the canonicalised password, so
+# "Riemann2026!" and "r13mann" are both caught while a long passphrase that
+# merely contains "riemann" is not.
+#
+# --- the service and its derivatives ---------------------------------------
+mathvault
+math vault
+mathvault.org
+mathvault.com
+mathvault admin
+mathvault user
+mathvault login
+mathvault password
+mathvault problems
+mathvault proofs
+vault
+thevault
+#
+# --- what every user of a mathematics site would be expected to type -------
+mathematics
+mathematic
+maths
+math
+mathematician
+theorem
+lemma
+corollary
+proof
+proofs
+qed
+quod erat demonstrandum
+axiom
+conjecture
+hypothesis
+integral
+derivative
+calculus
+algebra
+geometry
+topology
+analysis
+number theory
+infinity
+infinite
+eigenvalue
+eigenvector
+matrix
+vector
+polynomial
+fibonacci
+factorial
+logarithm
+#
+# --- constants and formulas -----------------------------------------------
+pi
+3.14
+3.1415
+3.14159
+3.141592
+3.1415926
+3.14159265
+3.141592653
+3.1415926535
+31415926535
+314159265358979
+2.71828
+2.718281828
+271828
+1.618
+1.6180339887
+0.5772
+1.41421356
+goldenratio
+golden ratio
+eulersnumber
+e=mc2
+emc2
+a2+b2=c2
+a^2+b^2=c^2
+eipi+1=0
+e^ipi+1=0
+e^(i*pi)+1=0
+1+1=2
+2+2=4
+42
+#
+# --- famous results -------------------------------------------------------
+pythagoras
+pythagorean
+pythagoreantheorem
+fermat
+fermatslasttheorem
+fermats last theorem
+riemannhypothesis
+riemann hypothesis
+goldbach
+goldbachconjecture
+collatz
+collatzconjecture
+poincare
+poincareconjecture
+basel problem
+baselproblem
+fundamental theorem
+#
+# --- mathematicians a maths site should expect -----------------------------
+euclid
+archimedes
+euler
+leonhardeuler
+gauss
+carlgauss
+carlfriedrichgauss
+riemann
+bernhardriemann
+newton
+isaacnewton
+leibniz
+pascal
+descartes
+hilbert
+davidhilbert
+cantor
+georgcantor
+godel
+goedel
+kurtgodel
+turing
+alanturing
+ramanujan
+srinivasaramanujan
+noether
+emmynoether
+erdos
+paulerdos
+galois
+evaristegalois
+abel
+cauchy
+fourier
+laplace
+lagrange
+bernoulli
+fibonacci
+hypatia
+kovalevskaya
+sophiegermain
+germain
+grothendieck
+perelman
+wiles
+andrewwiles
+tao
+terencetao

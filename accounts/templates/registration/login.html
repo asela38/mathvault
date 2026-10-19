@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Log in · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<div class="card">
+  <h1>Log in</h1>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.errors %}<ul class="errorlist nonfield"><li>Your username and password didn't match. Please try again.</li></ul>{% endif %}
+    <label for="id_username">Username</label>
+    <input type="text" name="username" id="id_username" autocomplete="username" autofocus required>
+    <label for="id_password">Password</label>
+    <input type="password" name="password" id="id_password" autocomplete="current-password" maxlength="256" class="password-input" required>
+    <input type="hidden" name="next" value="{{ next }}">
+    <button class="primary" type="submit">Log in</button>
+  </form>
+  <p class="muted">No account? <a href="{% url 'signup' %}">Sign up.</a></p>
+</div>
+{% endblock %}

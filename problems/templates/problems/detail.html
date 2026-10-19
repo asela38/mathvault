@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}{{ problem.title }} · {{ SITE_NAME }}{% endblock %}
+{% block content %}
+<div class="card">
+  <span class="tag">{{ problem.get_topic_display }}</span><span class="tag">{{ problem.get_difficulty_display }}</span>
+  <h1>{{ problem.title }}</h1>
+  <div class="statement">{{ problem.statement|linebreaks }}</div>
+  <p class="muted">Posted by {{ problem.author.username }} on {{ problem.created_at|date:"j M Y" }}</p>
+</div>
+<div class="card">
+  <h2>Solutions ({{ problem.solutions.count }})</h2>
+  {% for s in problem.solutions.all %}
+    <div style="border-top:1px solid var(--line);padding-top:10px">{{ s.body|linebreaks }}<p class="muted">{{ s.author.username }}, {{ s.created_at|date:"j M Y" }}</p></div>
+  {% empty %}<p class="muted">No solutions yet.</p>{% endfor %}
+  {% if user.is_authenticated %}
+  <form method="post">{% csrf_token %}
+    <label for="id_body">Your solution</label>{{ form.body }}{{ form.body.errors }}
+    <button class="primary" type="submit">Submit solution</button>
+  </form>
+  {% else %}<p><a href="{% url 'login' %}">Log in</a> to submit a solution.</p>{% endif %}
+</div>
+{% endblock %}
